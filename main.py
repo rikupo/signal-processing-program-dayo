@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 #音声処理用ライブラリ
 import IPython.display
@@ -14,19 +15,50 @@ from sklearn.decomposition import FastICA
 
 def main():
 
-    audio_path1 = "s1.wav"
-    audio_path2 = "s2.wav"
+    audio_path1 = "x1.wav"
+    audio_path2 = "x2.wav"
     try:
         audio1, sr1 = librosa.load(audio_path1)
         audio2, sr2 = librosa.load(audio_path2)
     except FileNotFoundError:
         print("open file failed")
         sys.exit(1)
-    #display(IPython.display.Audio(audio1, rate=sr1, autoplay=True)) #音声再生のUIが出ない．Pycharmでは無理？？Python consoleモードでも無理だった．
+    signal1 = pd.Series(audio1)
+    signal2 = pd.Series(audio2)
+    Correlation_coefficient = signal1.corr(signal2)
+
+    print(f"CC: {Correlation_coefficient}")
+
 
     if 1:
-        mpl_collection = librosa.display.waveplot(audio1, sr=sr1)
-        mpl_collection.axes.set(title="wave form", ylabel="Amplitude")
+        print("ICA process start")
+        X = np.concatenate((audio1.reshape(-1, 1), audio2.reshape(-1, 1)), 1)
+        transformer = FastICA(n_components=2, random_state=0)
+        X_t = transformer.fit_transform(X)
+        out1 = X_t[:,0]
+        out2 = X_t[:,1]
+        print("ICA process end")
+        print(f"out put shape {out1}")
+        print(f"out put shape {out2}")
+        signal1 = pd.Series(np.array(out1))
+        signal2 = pd.Series(np.array(out2))
+        # pd.series(out1)みたいな感じだとout1自体がndarray型のオブジェクトだから動かない．must be 1-dementionalって．
+        #
+        Correlation_coefficient = signal1.corr(signal2)
+
+        print(f"CC after process: {Correlation_coefficient}")
+
+        #print(f"out put shape {X_t[:,1]}")
+
+    #display(IPython.display.Audio(audio1, rate=sr1, autoplay=True)) #音声再生のUIが出ない．Pycharmでは無理？？Python consoleモードでも無理だった．
+        plt.figure(figsize=(20, 5))
+        plt.subplot(2, 1, 2)
+        plt.plot(X_t[:, 1])
+        plt.subplot(2, 1, 1)
+        plt.plot(X_t[:, 0])
+        plt.subplot(2, 1, 2)
+        plt.plot(X_t[:, 1])
+
         plt.show()
 
 #ICAで音声分離 https://deepblue-ts.co.jp/voice-processing/independent_components_analysis/
