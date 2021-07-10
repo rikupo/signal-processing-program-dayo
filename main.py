@@ -7,6 +7,8 @@ from IPython.display import display
 import librosa
 import librosa.display
 
+import sys
+
 # ICA
 from sklearn.decomposition import FastICA
 
@@ -14,8 +16,12 @@ def main():
 
     audio_path1 = "s1.wav"
     audio_path2 = "s2.wav"
-    audio1, sr1 = librosa.load(audio_path1)
-    audio2, sr2 = librosa.load(audio_path2)
+    try:
+        audio1, sr1 = librosa.load(audio_path1)
+        audio2, sr2 = librosa.load(audio_path2)
+    except FileNotFoundError:
+        print("open file failed")
+        sys.exit(1)
     #display(IPython.display.Audio(audio1, rate=sr1, autoplay=True)) #音声再生のUIが出ない．Pycharmでは無理？？Python consoleモードでも無理だった．
 
     if 1:
