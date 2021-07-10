@@ -16,9 +16,12 @@ def main():
     audio_path2 = "s2.wav"
     audio1, sr1 = librosa.load(audio_path1)
     audio2, sr2 = librosa.load(audio_path2)
-    print("hello1")
-    display(IPython.display.Audio(audio1, rate=sr1, autoplay=True)) #音声再生のUIが出ない．Pycharmでは無理？？Python consoleモードでも無理だった．
-    print("hello2")
+    #display(IPython.display.Audio(audio1, rate=sr1, autoplay=True)) #音声再生のUIが出ない．Pycharmでは無理？？Python consoleモードでも無理だった．
+
+    if 1:
+        mpl_collection = librosa.display.waveplot(audio1, sr=sr1)
+        mpl_collection.axes.set(title="wave form", ylabel="Amplitude")
+        plt.show()
 
 #ICAで音声分離 https://deepblue-ts.co.jp/voice-processing/independent_components_analysis/
 #音声処理ライブラリ https://qiita.com/lilacs/items/a331a8933ec135f63ab1
