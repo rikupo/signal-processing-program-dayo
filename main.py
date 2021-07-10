@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #音声処理用ライブラリ
+import IPython.display
+from IPython.display import display
 import librosa
 import librosa.display
 
@@ -14,9 +16,13 @@ def main():
     audio_path2 = "s2.wav"
     audio1, sr1 = librosa.load(audio_path1)
     audio2, sr2 = librosa.load(audio_path2)
+    print("hello1")
+    display(IPython.display.Audio(audio1, rate=sr1, autoplay=True)) #音声再生のUIが出ない．Pycharmでは無理？？Python consoleモードでも無理だった．
+    print("hello2")
 
 #ICAで音声分離 https://deepblue-ts.co.jp/voice-processing/independent_components_analysis/
 #音声処理ライブラリ https://qiita.com/lilacs/items/a331a8933ec135f63ab1
+# SNR/SDR: https://github.com/JusperLee/Calculate-SNR-SDR/blob/master
 #評価指標：dB 小さければよい？
 
 def audio_evaluation(original,result):
@@ -36,7 +42,6 @@ def calc_sir(original,result):
 # Source Image to SpatialdistortionRatio （ISR ）：音声対線形歪比
 def calc_isr(original,result):
     pass
-
 
 if __name__ == '__main__':
     main()
