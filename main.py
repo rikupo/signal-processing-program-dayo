@@ -17,36 +17,44 @@ def main():
 
     audio_path1 = "x1.wav"
     audio_path2 = "x2.wav"
+    audio_path3 = "x3.wav"
     try:
         audio1, sr1 = librosa.load(audio_path1)
         audio2, sr2 = librosa.load(audio_path2)
+        audio3, sr3 = librosa.load(audio_path3)
     except FileNotFoundError:
         print("open file failed")
         sys.exit(1)
     signal1 = pd.Series(audio1)
     signal2 = pd.Series(audio2)
-    Correlation_coefficient = signal1.corr(signal2)
-
-    print(f"CC: {Correlation_coefficient}")
+    signal3 = pd.Series(audio3)
+    Correlation_coefficient12 = signal1.corr(signal2)
+    Correlation_coefficient13 = signal1.corr(signal3)
+    Correlation_coefficient23 = signal2.corr(signal3)
+    print(f"CC of original signal: {Correlation_coefficient12}, {Correlation_coefficient13}, {Correlation_coefficient23}")
 
 
     if 1:
         print("ICA process start")
-        X = np.concatenate((audio1.reshape(-1, 1), audio2.reshape(-1, 1)), 1)
-        transformer = FastICA(n_components=2, random_state=0)
+        X = np.concatenate((audio1.reshape(-1, 1), audio2.reshape(-1, 1), audio3.reshape(-1,1)), 1)
+        transformer = FastICA(n_components=3, random_state=0)
         X_t = transformer.fit_transform(X)
         out1 = X_t[:,0]
         out2 = X_t[:,1]
+        out3 = X_t[:,2]
         print("ICA process end")
-        print(f"out put shape {out1}")
-        print(f"out put shape {out2}")
+        print(f"out put shape {X_t.shape}")
+        print(f"out put shape {len(out2)}")
         signal1 = pd.Series(np.array(out1))
         signal2 = pd.Series(np.array(out2))
+        signal3 = pd.Series(np.array(out3))
         # pd.series(out1)みたいな感じだとout1自体がndarray型のオブジェクトだから動かない．must be 1-dementionalって．
         #
-        Correlation_coefficient = signal1.corr(signal2)
+        Correlation_coefficient12 = signal1.corr(signal2)
+        Correlation_coefficient13 = signal1.corr(signal3)
+        Correlation_coefficient23 = signal2.corr(signal3)
 
-        print(f"CC after process: {Correlation_coefficient}")
+        print(f"CC after process: {Correlation_coefficient12}, {Correlation_coefficient13}, {Correlation_coefficient23}")
 
         #print(f"out put shape {X_t[:,1]}")
 
@@ -76,7 +84,7 @@ def audio_evaluation(original,result):
 def calc_sdr(original,result):
     pass
 
-#Source to Interference Ratio（SIR）： 音声対目的音声以外の音声による歪比
+# Source to Interference Ratio（SIR）： 音声対目的音声以外の音声による歪比
 def calc_sir(original,result):
     pass
 
