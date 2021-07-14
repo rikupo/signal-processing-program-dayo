@@ -40,17 +40,21 @@ def main():
     Correlation_coefficient23 = signal2.corr(signal3)
     print(f"CC of original signal: {Correlation_coefficient12}, {Correlation_coefficient13}, {Correlation_coefficient23}")
 
-    plt.figure(figsize=(20, 5))
+    plt.figure(figsize=(20, 7))
 
-    plt.subplot(3, 2, 1)
+    plt.subplot(3, 3, 2)
+    plt.plot(audio1, color="red")
+    plt.ylabel("Amplitude")
+
+    plt.subplot(3, 3, 4)
     plt.plot(original_audio1, color="red")
     plt.ylabel("Amplitude")
 
-    plt.subplot(3, 2, 2)
+    plt.subplot(3, 3, 5)
     plt.plot(original_audio2, color="green")
     plt.ylabel("Amplitude")
 
-    plt.subplot(3, 2, 3)
+    plt.subplot(3, 3, 6)
     plt.plot(original_audio3, color="blue")
     plt.ylabel("Amplitude")
 
@@ -81,15 +85,15 @@ def main():
 
         #plt.figure(figsize=(20, 5))
 
-        plt.subplot(3, 2, 4)
+        plt.subplot(3, 3, 8)
         plt.plot(X_t[:, 0],color = "red")
         plt.ylabel("Amplitude")
 
-        plt.subplot(3, 2, 5)
+        plt.subplot(3, 3, 9)
         plt.plot(X_t[:, 1],color = "green")
         plt.ylabel("Amplitude")
 
-        plt.subplot(3, 2, 6)
+        plt.subplot(3, 3, 7)
         plt.plot(X_t[:, 2],color = "blue")
         plt.ylabel("Amplitude")
 
