@@ -43,21 +43,16 @@ def main():
             print("Wrong Sampling Rate")
             sys.exit(1)
 
-    signal1 = pd.Series(audio1)
-    signal2 = pd.Series(audio2)
-    signal3 = pd.Series(audio3)
-    Correlation_coefficient12 = signal1.corr(signal2)
-    Correlation_coefficient13 = signal1.corr(signal3)
-    Correlation_coefficient23 = signal2.corr(signal3)
-    print(f"CC of original signal: {Correlation_coefficient12}, {Correlation_coefficient13}, {Correlation_coefficient23}")
+    calc_CC = False
+    if calc_CC:
+        calc_CC_with_3_signals(audio1, audio2, audio3, "mix")
+        calc_CC_with_3_signals(original_audio1, original_audio2,original_audio3 , "ori")
+        calc_CC_with_3_signals(sep_audio1, sep_audio2, sep_audio3, "seq")
 
-    signal1 = pd.Series(sep_audio1)
-    signal2 = pd.Series(sep_audio2)
-    signal3 = pd.Series(sep_audio3)
-    Correlation_coefficient12 = signal1.corr(signal2)
-    Correlation_coefficient13 = signal1.corr(signal3)
-    Correlation_coefficient23 = signal2.corr(signal3)
-    print(f"CC of sep signal: {Correlation_coefficient12}, {Correlation_coefficient13}, {Correlation_coefficient23}")
+    calc_
+    print(audio_evaluation(original_audio1,sep_audio1))
+    print(audio_evaluation(original_audio2, sep_audio2))
+    print(audio_evaluation(original_audio3, sep_audio3))
 
     show_graph = False
     if show_graph:
@@ -117,16 +112,14 @@ def main():
 
         plt.show()
 
-#ICAで音声分離 https://deepblue-ts.co.jp/voice-processing/independent_components_analysis/
-#音声処理ライブラリ https://qiita.com/lilacs/items/a331a8933ec135f63ab1
 # SNR/SDR: https://github.com/JusperLee/Calculate-SNR-SDR
 #評価指標：dB 小さければよい？
-
+# https://hal.inria.fr/inria-00544230/file/vincent_TASLP06bis.pdf
 def audio_evaluation(original,result):
     calc_sdr(original,result)
     calc_sir(original,result)
     calc_isr(original,result)
-    pass
+    return True
 
 # Signal-to-distortion ratio (SDR): 出力音の歪みの少なさを評価する尺度. 値が大きいほど音声の分離性能が優れていることを示す．
 def calc_sdr(original,result):
@@ -139,6 +132,15 @@ def calc_sir(original,result):
 # Source Image to SpatialdistortionRatio （ISR ）：音声対線形歪比
 def calc_isr(original,result):
     pass
+
+def calc_CC_with_3_signals(signal1,signal2,signal3,title = "Given"):
+    signal1 = pd.Series(signal1)
+    signal2 = pd.Series(signal2)
+    signal3 = pd.Series(signal3)
+    Correlation_coefficient12 = signal1.corr(signal2)
+    Correlation_coefficient13 = signal1.corr(signal3)
+    Correlation_coefficient23 = signal2.corr(signal3)
+    print(f"CC of {title} signal: {Correlation_coefficient12}, {Correlation_coefficient13}, {Correlation_coefficient23}")
 
 if __name__ == '__main__':
     main()
