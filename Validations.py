@@ -49,10 +49,11 @@ def main():
         calc_CC_with_3_signals(original_audio1, original_audio2,original_audio3 , "ori")
         calc_CC_with_3_signals(sep_audio1, sep_audio2, sep_audio3, "seq")
 
-    calc_
-    print(audio_evaluation(original_audio1,sep_audio1))
-    print(audio_evaluation(original_audio2, sep_audio2))
-    print(audio_evaluation(original_audio3, sep_audio3))
+    calc_SI_SDR = True
+    if calc_SI_SDR:
+        print(audio_evaluation(original_audio1,sep_audio1))
+        print(audio_evaluation(original_audio2, sep_audio2))
+        print(audio_evaluation(original_audio3, sep_audio3))
 
     show_graph = False
     if show_graph:
