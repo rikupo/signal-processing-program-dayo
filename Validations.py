@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import math
 
 #音声処理用ライブラリ
 import IPython.display
@@ -23,9 +24,9 @@ def main():
         original_audio_path1 = "s1.wav"  # Mario64
         original_audio_path2 = "s2.wav"  # jupyter
         original_audio_path3 = "s3.wav"  # Pipe
-        sep_audio_path2 = "Sep-signal1.wav"  # jupyter
-        sep_audio_path3 = "Sep-signal2.wav"  # Pipe
-        sep_audio_path1 = "Sep-signal3.wav"  # Mario64
+        sep_audio_path2 = "Sep-signal1.wav"  # jupyter Separated
+        sep_audio_path3 = "Sep-signal2.wav"  # Pipe Separated
+        sep_audio_path1 = "Sep-signal3.wav"  # Mario64 Separated
         try:
             audio1, sr1 = librosa.load(audio_path1)
             audio2, sr2 = librosa.load(audio_path2)
@@ -49,8 +50,17 @@ def main():
         calc_CC_with_3_signals(original_audio1, original_audio2,original_audio3 , "ori")
         calc_CC_with_3_signals(sep_audio1, sep_audio2, sep_audio3, "seq")
 
-    calc_SI_SDR = True
-    if calc_SI_SDR:
+    calc_additonal_evaluation = True
+    if calc_additonal_evaluation:
+        originals = np.concatenate([[original_audio1],[original_audio2],[original_audio3]])
+
+        print("SDR,SIR,SAR")
+        originals = originals.transpose()
+
+        print(audio_evaluation2(originals,sep_audio1,0))
+        print(audio_evaluation2(originals, sep_audio2, 1))
+        print(audio_evaluation2(originals, sep_audio3, 2))
+
         print(audio_evaluation(original_audio1,sep_audio1))
         print(audio_evaluation(original_audio2, sep_audio2))
         print(audio_evaluation(original_audio3, sep_audio3))
@@ -116,23 +126,68 @@ def main():
 # SNR/SDR: https://github.com/JusperLee/Calculate-SNR-SDR
 #評価指標：dB 小さければよい？
 # https://hal.inria.fr/inria-00544230/file/vincent_TASLP06bis.pdf
-def audio_evaluation(original,result):
-    calc_sdr(original,result)
-    calc_sir(original,result)
-    calc_isr(original,result)
-    return True
 
-# Signal-to-distortion ratio (SDR): 出力音の歪みの少なさを評価する尺度. 値が大きいほど音声の分離性能が優れていることを示す．
-def calc_sdr(original,result):
-    pass
+# Modified from The sigsep that is Open Resources for Audio Source Separation https://github.com/sigsep/bsseval/issues/3
+def audio_evaluation(reference_signals, estimated_signal, scaling=True):
+    Rss = np.dot(reference_signals.transpose(), reference_signals)
+    this_s = reference_signals
 
-# Source to Interference Ratio（SIR）： 音声対目的音声以外の音声による歪比
-def calc_sir(original,result):
-    pass
+    if scaling:
+        a = np.dot(this_s, estimated_signal) / Rss
+    else:
+        a = 1
+    # print(f"Debug:: {a}")
+    e_true = a * this_s
+    e_res = estimated_signal - e_true
 
-# Source Image to SpatialdistortionRatio （ISR ）：音声対線形歪比
-def calc_isr(original,result):
-    pass
+    Sss = (e_true ** 2).sum()
+    Snn = (e_res ** 2).sum()
+
+    SDR = 10 * math.log10(Sss / Snn)
+
+    # Get the SIR
+    Rsr = np.dot(reference_signals.transpose(), e_res)
+    # linalg.solve arg1: A of AX = B arg2: B return: X
+    # b = np.linalg.solve(Rss, Rsr)
+    b = Rsr/Rss
+    e_interf = np.dot(reference_signals, b)
+    e_artif = e_res - e_interf
+
+    SIR = 10 * math.log10(Sss / (e_interf ** 2).sum())
+    SAR = 10 * math.log10(Sss / (e_artif ** 2).sum())
+
+    return SDR, SIR, SAR
+
+
+def audio_evaluation2(reference_signals, estimated_signal, j, scaling=True):
+    Rss = np.dot(reference_signals.transpose(), reference_signals)
+    this_s = reference_signals[:, j]
+
+    if scaling:
+        # get the scaling factor for clean sources
+        a = np.dot(this_s, estimated_signal) / Rss[j, j]
+    else:
+        a = 1
+
+    e_true = a * this_s
+    e_res = estimated_signal - e_true
+
+    Sss = (e_true ** 2).sum()
+    Snn = (e_res ** 2).sum()
+
+    SDR = 10 * math.log10(Sss / Snn)
+
+    # Get the SIR
+    Rsr = np.dot(reference_signals.transpose(), e_res)
+    b = np.linalg.solve(Rss, Rsr)
+
+    e_interf = np.dot(reference_signals, b)
+    e_artif = e_res - e_interf
+
+    SIR = 10 * math.log10(Sss / (e_interf ** 2).sum())
+    SAR = 10 * math.log10(Sss / (e_artif ** 2).sum())
+
+    return SDR, SIR, SAR
 
 def calc_CC_with_3_signals(signal1,signal2,signal3,title = "Given"):
     signal1 = pd.Series(signal1)
@@ -145,3 +200,5 @@ def calc_CC_with_3_signals(signal1,signal2,signal3,title = "Given"):
 
 if __name__ == '__main__':
     main()
+
+# SIR/SDR式 https://ipsj.ixsq.nii.ac.jp/ej/?action=repository_uri&item_id=113127&file_id=1&file_no=1
